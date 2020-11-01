@@ -1,0 +1,100 @@
+﻿@page  "/Cliente/Cadastrar"
+@using System.Net.Http
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<div class="card m-3">
+    <h4 class="card-header">Cadastro Cliente</h4>
+    <div class="card-body">
+        <EditForm Model="@Cliente" OnValidSubmit="HandleValidSubmit" @onreset="HandleReset">
+            <DataAnnotationsValidator />
+
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>Nome</label>
+                    <InputText @bind-Value="Cliente.Nome" class="form-control" />
+                    <ValidationMessage For="@(() => Cliente.Nome)" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col">
+                    <label>Numero de identificação</label>
+                    <InputText @bind-Value="Cliente.Numeroidentificacao" class="form-control" />
+                    <ValidationMessage For="@(() => Cliente.Numeroidentificacao)" />
+                </div>
+            </div>
+            <div class="form-row">
+                <InputSelect 
+                    ValueExpression="@(()=>petshopDto.petshopId)"
+                    Value="Cliente.PetshopId" class="form-control"
+                    ValueChanged="@((int value) => OnChangePet(value))">">
+                    <option value="">Selecione o petshop</option>
+                    @foreach (var petshop in petshopList)
+                    {
+                        <option value="@petshop.Id">@petshop.Nome</option>
+                    }   
+                </InputSelect>
+            </div>
+
+            @*<div class="form-row">
+                <div class="form-group col">
+                    <label>Código do petshop</label>
+                    <InputNumber @bind-Value="Cliente.PetshopId" class="form-control" />
+                    <ValidationMessage For="@(() => Cliente.PetshopId)" />
+                </div>
+            </div>*@
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Salvar</button>
+                <button type="reset" class="btn btn-secondary">Cancel</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code { 
+    private Cliente Cliente = new Cliente();
+    private EditContext editContext { get; set; }
+    private List<Petshop> petshopList = new List<Petshop>();
+    private PetshopOA.Shared.PetshopDto petshopDto = new PetshopOA.Shared.PetshopDto();
+
+    public string Text { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        var teste = await Http.PostAsJsonAsync("/api/Clientes", Cliente);
+        NavigationManager.NavigateTo("/Cliente/List");
+
+    }
+
+    private void HandleReset()
+    {
+        Cliente = new Cliente();
+        editContext = new EditContext(Cliente);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var petshop = await Http.GetFromJsonAsync<List<Petshop>>("/api/Petshops");
+        foreach (var item in petshop)
+        {
+            petshopList.Add(item);
+        }
+    }
+
+    private async Task OnChangePet(int value)
+    {
+        petshopDto.petshopId = value; //Seta o valor da Categoria no pedidoDto
+        var petshop = await Http.GetFromJsonAsync<List<Petshop>>("/api/Petshops");
+        petshopList.Clear();
+        var cadastroByPetshop = petshop.Where(p => p.Id == Convert.ToInt32(value));
+        foreach (var item in cadastroByPetshop) //LINQ
+        {
+            petshopList.Add(item);
+        }
+
+    }
+
+
+}
