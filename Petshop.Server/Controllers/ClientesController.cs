@@ -43,14 +43,22 @@ namespace Petshop.Server.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(int id, Cliente cliente)
+        public async Task<IActionResult> PutCliente(int id, ClienteDto cliente)
         {
-            if (id != cliente.Id)
+
+            var cliente2 = new Cliente
+            {
+                Nome = cliente.Nome,
+                Numeroidentificacao = cliente.Numeroidentificacao,
+                PetshopId = int.Parse(cliente.PetshopId)
+            };
+
+            if (id != cliente2.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(cliente).State = EntityState.Modified;
+            _context.Entry(cliente2).State = EntityState.Modified;
 
             try
             {
@@ -75,9 +83,15 @@ namespace Petshop.Server.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        public async Task<ActionResult<ClienteDto>> PostCliente(ClienteDto cliente)
         {
-            _context.Clientes.Add(cliente);
+            var cliente2 = new Cliente
+            {
+                Nome = cliente.Nome,
+                Numeroidentificacao = cliente.Numeroidentificacao,
+                PetshopId = int.Parse(cliente.PetshopId)
+            };
+            _context.Clientes.Add(cliente2);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCliente", new { id = cliente.Id }, cliente);

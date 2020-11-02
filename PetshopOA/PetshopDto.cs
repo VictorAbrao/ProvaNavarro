@@ -8,7 +8,7 @@ namespace PetshopOA.Shared
 {
     public class PetshopDto
     {
-        public int petshopId { get; set; }
+        public string petshopId { get; set; }
         public string petshopNome { get; set; }
 
         public string petshopEndereco { get; set; }
